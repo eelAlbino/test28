@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
-
+use App\Http\Controllers\CarModelController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,3 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Получение списка брендов
 Route::get('brand', [BrandController::class, 'index']);
+
+// Получение списка моделей авто
+Route::get('car-model', [CarModelController::class, 'index']);
