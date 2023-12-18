@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CarModelController;
+use App\Http\Controllers\CarController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,3 +26,8 @@ Route::get('brand', [BrandController::class, 'index']);
 
 // Получение списка моделей авто
 Route::get('car-model', [CarModelController::class, 'index']);
+
+// Круд для элементов автомобилей, с использованием аутентификации пользователя
+Route::middleware('auth:api')->group(function () {
+    Route::resource('cars', CarController::class);
+});
