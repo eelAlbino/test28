@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Brand;
+use App\Docs\Swagger\Controllers\BrandControllerInterface;
 
-class BrandController extends Controller
+
+class BrandController extends Controller implements BrandControllerInterface
 {
     /**
      * Выборка элементов марок Авто

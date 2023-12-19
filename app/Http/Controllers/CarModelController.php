@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\CarModel;
+use App\Docs\Swagger\Controllers\CarModelControllerInterface;
 
-class CarModelController extends Controller
+class CarModelController extends Controller implements CarModelControllerInterface
 {
     /**
      * Выборка элементов моделей Авто

@@ -2,8 +2,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Docs\Swagger\Controllers\CarControllerInterface;
+use App\Models\Car;
 
-class CarController extends Controller
+class CarController extends Controller implements CarControllerInterface
 {
     /**
      * Выборка элементов авто
@@ -13,7 +15,8 @@ class CarController extends Controller
     public function index(Request $request): array
     {
         $offset = (int) $request->input('offset', 0);
-        $resSelect = auth()->user()->cars::offset($offset)->paginate(10);
+        $user = auth()->user();
+        $resSelect = Car::offset($offset)->where('user_id', $user->id)->with(['model', 'color'])->paginate(10);
         return [
             'success' => true,
             'data' => [
@@ -30,11 +33,10 @@ class CarController extends Controller
      */
     public function show(int $id)
     {
-        $car = auth()->user()
-            ->cars()
-            ->findOrFail($id);
+        $user = auth()->user();
+        $car = Car::where('user_id', $user->id)->with(['model', 'color'])->find($id);
         return response()->json([
-            'success' => true,
+            'success' => !!$car,
             'data' => [
                 'elem' => $car
             ]
@@ -47,9 +49,10 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        $car = auth()->user()
-            ->cars()
-            ->create($request->all());
+        $user = auth()->user();
+        $data = $request->all();
+        $data['user_id'] = $user->id;
+        $car = Car::create($data);
         return response()->json([
             'success' => true,
             'data' => [
@@ -65,12 +68,16 @@ class CarController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $car = auth()->user()
-            ->cars()
-            ->findOrFail($id);
-        $car->update($request->all());
+        $success = false;
+        $user = auth()->user();
+        $car = Car::where('user_id', $user->id)->find($id);
+        if ($car) {
+            $car->update($request->all());
+            $success = true;
+            $car = Car::where('user_id', $user->id)->with(['model', 'color'])->find($id);
+        }
         return response()->json([
-            'success' => true,
+            'success' => $success,
             'data' => [
                 'elem' => $car
             ]
@@ -83,9 +90,8 @@ class CarController extends Controller
      */
     public function destroy(int $id)
     {
-        $car = auth()->user()
-            ->cars()
-            ->findOrFail($id);
+        $user = auth()->user();
+        $car = Car::where('user_id', $user->id)->find($id);
         $car->delete();
         return response()->json(null, 204);
     }
