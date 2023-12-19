@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Docs\Swagger\Models\ColorModelInterface;
 
-class Color extends Model
+class Color extends Model implements ColorModelInterface
 {
     use HasFactory;
 
