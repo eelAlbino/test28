@@ -8,24 +8,59 @@ use App\Models\Car;
 use App\Models\CarModel;
 use App\Models\User;
 use App\Models\Color;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CarControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    // Пользователь, к которому привязаны тестовые данные
+    private ?int $userID = null;
+
+    // Токен для авторизации
+    private ?string $authToken = null;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->setUserParams();
+    }
+
+    /**
+     * Установка параметров тестового пользователя
+     */
+    private function setUserParams(): void
+    {
+        $pass = 'pass123';
+        $userParams = [
+            'email' => 'test@test.ru',
+            'password' => bcrypt($pass)
+        ];
+        $this->artisan('passport:install');
+        $user = User::factory()->create($userParams);
+        $oauthClient = DB::table('oauth_clients')->where('provider', 'users')->first();
+        $response = $this->postJson('/oauth/token', [
+            'grant_type' => 'password',
+            'client_id' => $oauthClient->id,
+            'client_secret' => $oauthClient->secret,
+            'username' => $userParams['email'],
+            'password' => $pass
+        ]);
+        $this->userID = $user->id;
+        $this->authToken = $response->json('access_token');
+    }
     /**
      * Получение списка автомобилей для определенного пользователя
      */
     public function testIndex()
     {
-        $user = User::factory()->create();
-        $token = $user->createToken('TestToken')->accessToken;
         // Создаем несколько машин для пользователя
-        Car::factory(15)->create([
-            'user_id' => $user->id
+        $resSelect = Car::factory(15)->create([
+            'user_id' => $this->userID
         ]);
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->token
+            'Authorization' => 'Bearer ' . $this->authToken
         ])->get('/api/cars');
 
         $response->assertStatus(200);
@@ -44,41 +79,37 @@ class CarControllerTest extends TestCase
      */
     public function testStore()
     {
-        $user = User::factory()->create();
-        $token = $user->createToken('TestToken')->accessToken;
         $carData = Car::factory()->make([
-            'user_id' => $user->id
-        ]);
+            'user_id' => $this->userID
+        ])->toArray();
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->token
+            'Authorization' => 'Bearer ' . $this->authToken
         ])->postJson('/api/cars', $carData);
 
         $response->assertStatus(201)->assertJson([
             'success' => true,
             'data' => [
-                'elem' => $carData->toArray()
+                'elem' => $carData
             ]
         ]);
 
-        $this->assertDatabaseHas('cars', $carData->toArray());
+        $this->assertDatabaseHas('cars', $carData);
     }
 
     /**
      * Обновление авто пользователя
      */
-    public function testUpdate(array $params)
+    public function testUpdate()
     {
-        $user = User::factory()->create();
-        $token = $user->createToken('TestToken')->accessToken;
         $modelOld = CarModel::factory()->create();
         $colorOld = Color::factory()->create();
         $car = Car::factory()->create([
-            'user_id' => $userOld->id,
+            'user_id' => $this->userID,
             'model_id' => $modelOld->id,
             'color_id' => $colorOld->id,
         ]);
         $model = CarModel::factory()->create();
-        $color = CarModel::factory()->create();
+        $color = Color::factory()->create();
         $updateDate = [
             'model_id' => $model->id,
             'color_id' => $color->id,
@@ -86,15 +117,15 @@ class CarControllerTest extends TestCase
             'year_production' => $car->year_production - 1,
         ];
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->token
-        ])->putJson('/api/cars/' . $car->id, $updatedData);
+            'Authorization' => 'Bearer ' . $this->authToken
+        ])->putJson('/api/cars/' . $car->id, $updateDate);
         $response->assertStatus(200)->assertJson([
             'success' => true,
             'data' => [
-                'elem' => $carData->toArray()
+                'elem' => $updateDate
             ]
         ]);
-        $this->assertDatabaseHas('cars', $carData->toArray());
+        $this->assertDatabaseHas('cars', $updateDate);
     }
 
     /**
@@ -102,17 +133,13 @@ class CarControllerTest extends TestCase
      */
     public function testDestroy()
     {
-        $user = User::factory()->create();
-        $token = $user->createToken('TestToken')->accessToken;
         $car = Car::factory()->create([
-            'user_id' => $user->id,
+            'user_id' => $this->userID,
         ]);
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->token
+            'Authorization' => 'Bearer ' . $this->authToken
         ])->deleteJson('/api/cars/' . $car->id);
-        $response->assertStatus(204)->assertJson([
-            'success' => true
-        ]);
+        $response->assertStatus(204);
         $this->assertDatabaseMissing('cars', ['id' => $car->id]);
     }
 }
