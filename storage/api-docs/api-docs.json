@@ -1,0 +1,512 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Документация для тестового задания",
+        "description": "Задание описано в файле README.md",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/oauth/token": {
+            "post": {
+                "tags": [
+                    "Аутентификация"
+                ],
+                "summary": "Получение токена аутентификации",
+                "operationId": "getToken",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "grant_type": {
+                                        "description": "Тип привелегий. Для получения токена передается password",
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "client_id": {
+                                        "description": "client ID для Passport. Установка passport командой <i>passport:install</i>. Если client ID/secret отсутствуют, для генерации нового можно воспользоваться командой <i>artisan passport:client --password</i>",
+                                        "type": "string",
+                                        "example": "pass_client_id"
+                                    },
+                                    "client_secret": {
+                                        "description": "client secret для Passport. Установка passport командой <i>passport:install</i>. Если client ID/secret отсутствуют, для генерации нового можно воспользоваться командой <i>artisan passport:client --password</i>",
+                                        "type": "string",
+                                        "example": "pass_client_secret"
+                                    },
+                                    "username": {
+                                        "description": "E-mail пользователя",
+                                        "type": "string",
+                                        "example": "test@test.ru"
+                                    },
+                                    "password": {
+                                        "description": "Паспорт пользователя",
+                                        "type": "string",
+                                        "example": "pass123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token_type": {
+                                            "description": "Тип токена",
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "description": "Продолжительность жизни токена",
+                                            "type": "integer",
+                                            "example": 3600
+                                        },
+                                        "access_token": {
+                                            "description": "Токен для аутентификации",
+                                            "type": "string",
+                                            "example": "your_access_token"
+                                        },
+                                        "refresh_token": {
+                                            "description": "Токен для обновления токена",
+                                            "type": "string",
+                                            "example": "your_refresh_token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/brand": {
+            "get": {
+                "tags": [
+                    "Марки автомобилей"
+                ],
+                "summary": "Получение списка марок автомобилей",
+                "operationId": "getBrands",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Brand"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/cars": {
+            "get": {
+                "tags": [
+                    "Автомобили пользователя"
+                ],
+                "summary": "Получение списка авто для пользователя",
+                "operationId": "getCars",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Car"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Автомобили пользователя"
+                ],
+                "summary": "Создает автомобиль",
+                "operationId": "storeCar",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Car"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Элемент успешно создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "number": {
+                                                    "$ref": "#/components/schemas/Car"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/cars/{id}": {
+            "get": {
+                "tags": [
+                    "Автомобили пользователя"
+                ],
+                "summary": "Получение элемента авто по ID",
+                "operationId": "getCarById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID элемента",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "number": {
+                                                    "$ref": "#/components/schemas/Car"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Элемент не был найден"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Автомобили пользователя"
+                ],
+                "summary": "Обновление автомобиля",
+                "operationId": "updateCar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID обновляемого элемента",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Car"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "number": {
+                                                    "$ref": "#/components/schemas/Car"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Элемент не был найден"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Автомобили пользователя"
+                ],
+                "summary": "Удаление автомобиля",
+                "operationId": "deleteCar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID удаляемого элемента",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Удаление прошло успешно"
+                    },
+                    "404": {
+                        "description": "Элемент не был найден"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/car-model": {
+            "get": {
+                "tags": [
+                    "Модели автомобилей"
+                ],
+                "summary": "Получение списка моделей автомобилей",
+                "operationId": "getModels",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "true"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CarModel"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Brand": {
+                "title": "Марка автомобиля",
+                "properties": {
+                    "id": {
+                        "description": "ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Название",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "Car": {
+                "title": "Автомобиль",
+                "properties": {
+                    "id": {
+                        "description": "ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "model_id": {
+                        "description": "ID модели",
+                        "type": "integer"
+                    },
+                    "model": {
+                        "$ref": "#/components/schemas/CarModel"
+                    },
+                    "year_production": {
+                        "description": "Год производства",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "mileage": {
+                        "description": "Пробег, в км",
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "color_id": {
+                        "description": "ID цвета",
+                        "type": "integer"
+                    },
+                    "color": {
+                        "$ref": "#/components/schemas/Color"
+                    },
+                    "user_id": {
+                        "description": "ID пользователя",
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "CarModel": {
+                "title": "Модель автомобиля",
+                "properties": {
+                    "id": {
+                        "description": "ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Название",
+                        "type": "string"
+                    },
+                    "brand_id": {
+                        "description": "ID бренда",
+                        "type": "integer"
+                    },
+                    "brand": {
+                        "$ref": "#/components/schemas/Brand"
+                    }
+                },
+                "type": "object"
+            },
+            "Color": {
+                "title": "Цвет",
+                "properties": {
+                    "id": {
+                        "description": "ID",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "description": "Название",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearer_token": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    }
+}
